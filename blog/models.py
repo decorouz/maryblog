@@ -17,8 +17,7 @@ class PublishedManager(models.Manager):
     """ Retrieve all post with the `published` status"""
 
     def get_queryset(self):
-        return super(PublishedManager, self).get_queryset()\
-            .filter(status="published")
+        return super(PublishedManager, self).get_queryset().filter(status="published")
 
 
 class Post(models.Model):

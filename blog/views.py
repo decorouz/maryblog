@@ -1,4 +1,3 @@
-from django.db import models
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .models import Post
@@ -9,17 +8,18 @@ from django.views.generic import ListView
 
 
 # Create class base views
-
+#
 class PostListView(ListView):
+    queryset = Post.published.all()
     template_name = "blog/post/list.html"
-    pagination = 3
-    query_set = Post.published.all()
-    context_name_object = "posts"
-
+    paginate_by = 3
+    context_object_name = "posts"
 
 # Lets create a second view to display a single post
 
+
 def post_detail(request, year, month, day, post):
+    """ Handles the views of a single post"""
     post = get_object_or_404(Post,
                              slug=post, status="published",
                              published_date__year=year,
