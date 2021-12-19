@@ -1,9 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-
-from blog.forms import EmailPostForm
-from .models import Post
+from blog.forms import EmailPostForm, CommentForm
+from .models import Post, Comment
 from django.views.generic import ListView
 
 
@@ -36,8 +35,6 @@ class PostListView(ListView):
     paginate_by = 3
     context_object_name = "posts"
 
-# Lets create a second view to display a single post
-
 
 def post_detail(request, year, month, day, post):
     """ Handles the views of a single post"""
@@ -46,4 +43,24 @@ def post_detail(request, year, month, day, post):
                              published_date__year=year,
                              published_date__month=month,
                              published_date__day=day)
-    return render(request, "blog/post/detail.html", {"post": post})
+
+    # List of active comments for this post
+    comments = post.comments.filter(active=True)
+    new_comment = None
+
+    if request.method == "POST":
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            # Create comment object but don't save to database yet
+            new_comment = comment_form.save(commit=False)
+            # Assign the current post to the comment
+            new_comment.post = post
+            # Save the comment to the database
+            new_comment.save()
+    else:
+        comment_form = CommentForm()
+
+    return render(request, "blog/post/detail.html", {"post": post,
+                                                     "comments": comments,
+                                                     "new_comment": new_comment,
+                                                     "comment_form": comment_form})
