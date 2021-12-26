@@ -6,6 +6,7 @@ from django.db.models.fields.related import ForeignKey
 from django.db.models.manager import Manager
 from django.utils import timezone
 from django.urls import reverse
+from taggit.managers import TaggableManager
 
 # Create your models here.
 
@@ -48,6 +49,8 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse("blog:post_detail",
                        args=[self.published_date.year, self.published_date.month, self.published_date.day, self.slug])
+
+    tags = TaggableManager()
 
 
 class Comment(models.Model):

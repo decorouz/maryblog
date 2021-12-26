@@ -1,9 +1,40 @@
+from django.core import paginator
 from django.shortcuts import render, get_object_or_404
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from blog.forms import EmailPostForm, CommentForm
 from .models import Post, Comment
 from django.views.generic import ListView
+from taggit.models import Tag
+
+
+# class PostListView(ListView):
+#     queryset = Post.published.all()
+#     template_name = "blog/post/list.html"
+#     paginate_by = 3
+#     context_object_name = "posts"
+
+
+def post_list(request, tag_slug=None):
+    object_list = Post.published.all()
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+    paginator = Paginator(object_list, 3)
+    page = request.GET.get("page")
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # if page is not an integer deliver the first page
+        posts = paginator.page(1)
+    except EmptyPage:
+        # if page is our of range deliver the last page of results
+        posts = paginator.page(paginator.num_pages)
+
+    return render(request, "blog/post/list.html", {"page": page,
+                                                   "posts": posts,
+                                                   "tag": tag})
 
 
 # Create your views here.
@@ -27,13 +58,6 @@ def post_share(request, post_id):
 
 # Create class base views
 #
-
-
-class PostListView(ListView):
-    queryset = Post.published.all()
-    template_name = "blog/post/list.html"
-    paginate_by = 3
-    context_object_name = "posts"
 
 
 def post_detail(request, year, month, day, post):
