@@ -1,9 +1,13 @@
 {% extends "blog/base.html" %}
 {% load blog_tags %}
 
+
 {% block title %}{{ post.title }}{% endblock %}
+
 {% block content %}
+  <img src="{{ post.featured_image.url }}" alt="post image">
   <h1>{{ post.title }}</h1>
+  
   <p class="date">
     Published {{ post.published_date }} by {{ post.author }}
   </p>

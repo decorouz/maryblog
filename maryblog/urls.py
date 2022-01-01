@@ -18,6 +18,8 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from blog.sitemaps import PostSitemap
 from django.contrib.sitemaps.views import sitemap
+from django.conf import settings
+from django.conf.urls.static import static
 
 sitemaps = {
     "post": PostSitemap
@@ -30,3 +32,5 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap')
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
