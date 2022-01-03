@@ -2,17 +2,22 @@
 <!DOCTYPE html>
 
 <html>
-<head>
-  <title>{% block title %}{% endblock %}</title>
-  <link href="{% static 'styles/main.css' %}" rel="stylesheet">
-</head>
-<body>
-  {% include "navbar.html" %} 
-  <div id="content">
-    {% block content %}
-    {% endblock %}
-  </div>
-  {% include "sidebar.html" %}
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>{% block title %} {% endblock %}</title>
 
-</body>
+    <!-- main css -->
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}" />
+  </head>
+  <body>
+    <div id="content">{% block content %} {% endblock %}</div>
+    {% include "sidebar.html" %}
+  </body>
 </html>
+
+<!--Optional Js -->
