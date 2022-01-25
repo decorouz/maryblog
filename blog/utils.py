@@ -18,7 +18,7 @@ def post_pagination(request):
         posts = paginator.page(page)
 
     """
-    This is to ensure that we don't have insane amount of paginations
+    This is to ensure that we don't have dynamic pagination
     as the post object increases with every new addition
     """
 
