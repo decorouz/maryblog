@@ -1,6 +1,5 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from blog.forms import EmailPostForm, CommentForm, PostForm, SearchForm
@@ -13,12 +12,7 @@ from .models import Post
 from taggit.models import Tag
 from django.db.models import Count
 
-
-# class PostListView(ListView):
-#     queryset = Post.published.all()
-#     template_name = "blog/post/list.html"
-#     paginate_by = 3
-#     context_object_name = "posts"
+from .utils import post_pagination
 
 
 def create_post(request):
@@ -35,9 +29,6 @@ def create_post(request):
 
 
 def post_list(request, tag_slug=None):
-    # comments = Post.objects.all().annotate(Count('comments'))
-    # comm = Comment.objects.filter(post__in=comments)
-
     common_tags = Post.tags.all()
 
     object_list = Post.published.all()
@@ -47,25 +38,14 @@ def post_list(request, tag_slug=None):
         tag = get_object_or_404(Tag, slug=tag_slug)
         object_list = object_list.filter(tags__in=[tag])
 
-    paginator = Paginator(object_list, 5)
+    posts, custom_range = post_pagination(request)
 
-    page = request.GET.get("page")
-    try:
-        posts = paginator.page(page)
-    except PageNotAnInteger:
-        # if page is not an integer, deliver the first page
-        page = 1
-        posts = paginator.page(page)
-    except EmptyPage:
-        # if page is out of range, deliver the last page of results
-        page = paginator.num_pages
-        posts = paginator.page(page)
+    context = {"custom_range": custom_range, "posts": posts, "tag": tag,
+               "common_tags": common_tags}
 
     return render(
         request,
-        "blog/post/list.html",
-        {"page": page, "paginator": paginator, "posts": posts, "tag": tag,
-            "common_tags": common_tags},
+        "blog/post/list.html", context
     )
 
 

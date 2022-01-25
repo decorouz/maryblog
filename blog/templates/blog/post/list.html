@@ -47,9 +47,9 @@
   </div>
 
 
-  {% if posts.has_other_pages %}
-  {% include "pagination.html" with page=posts %}
-  {% endif%}
+
+  {% include "pagination.html" with page=posts custom_range=custom_range %}
+
   <!-- END-->
 </div>
 {% endblock %}

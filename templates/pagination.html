@@ -1,3 +1,5 @@
+{% if posts.has_other_pages %}
+
 <div class="row">
   <div class="col">
     <div class="block-27">
@@ -9,7 +11,7 @@
         </li>
         {% endif %}
 
-        {% for page in paginator.page_range %}
+        {% for page in custom_range %}
 
         {% if page == posts.number %}
         <li class="active"><a href="?page={{page}}">{{page}}</a></li>
@@ -31,3 +33,5 @@
     </div>
   </div>
 </div>
+
+{% endif %}
