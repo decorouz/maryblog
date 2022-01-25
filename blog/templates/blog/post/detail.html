@@ -1,61 +1,83 @@
-{% extends "base.html" %}
-{% load blog_tags %}
+{% extends "base.html" %} {% load blog_tags %} {% block title %} {{ post.title }} {% endblock %} {% block content %}
 
+<div class="col-lg-8 px-md-5 py-5">
+    <div class="row pt-md-4">
+        <h1 class="mb-3">{{ post.title }}</h1>
 
-{% block title %}{{ post.title }}{% endblock %}
+        <p>
+            <img src="{{ post.featured_image.url }}" alt="" class="img-fluid" />
+        </p>
+        <div class="meta-wrap">
+            <p class="meta">
+                <span>Published {{ post.published_date }} by <i class="icon-person"></i>{{post.author.first_name}}
+                    {{post.author.last_name}}</span>
+                {% with comments.count as total_comments %}
+                <span>
+                    <i class="icon-comment2 mr-2"></i> {{ total_comments }} comment{{ total_comments|pluralize }}
+                </span>
+                {% endwith %}
+            </p>
+        </div>
+        <p>{{ post.body|markdown }}</p>
 
-{% block content %}
-  <img src="{{ post.featured_image.url }}" alt="post image">
-  <h1>{{ post.title }}</h1>
-  
-  <p class="date">
-    Published {{ post.published_date }} by {{ post.author }}
-  </p>
-  {{ post.body|markdown }}
+        <div class="tag-widget post-tag-container mb-5 mt-5">
+            {% for tag in post.tags.all %}
+            <span class="tagcloud">
+                <a href="{% url 'blog:post_list_by_tag' tag.slug %}" class="tag-cloud-link">{{ tag.name }}</a>
+            </span>
+            {% endfor %}
+        </div>
 
+        <div class="about-author d-flex p-4 bg-light">
+            <div class="bio mr-5">
+                <img src="images/author_1.jpg" alt="Image placeholder" class="img-fluid mb-4" />
+            </div>
+            <div class="desc">
+                <h3>{{ post.author.first_name}} {{ post.author.last_name}}</h3>
+                <p>Summary of the about me of the author</p>
+            </div>
+        </div>
 
-  <p>
-    <a href="{% url "blog:post_share" post.id %}">
-      Share this post
-    </a>
-  </p>
+        <div class="pt-5 mt-5">
+            {% with comments.count as total_comments %}
+            <h3 class="mb-5 font-weight-bold">{{ total_comments }} comment{{ total_comments|pluralize }}</h3>
+            {% endwith %}
+            <ul class="comment-list">
+                {% for comment in comments %}
+                <li class="comment">
+                    <div class="vcard bio">
+                        <img src="images/person_1.jpg" alt="Image placeholder" />
+                    </div>
+                    <div class="comment-body">
+                        <h3>{{ comment.name }}</h3>
+                        <div class="meta">{{ comment.created }}</div>
+                        <p>{{ comment.body|linebreaks }}</p>
+                        <p><a href="#" class="reply">Reply</a></p>
+                    </div>
+                    {% empty %}
+                    <p>There are no comments yet.</p>
+                    {% endfor %}
+                </li>
+            </ul>
+            <!-- END comment-list -->
 
-  <h2>Similar posts</h2>
-  {% for post in similar_posts %}
-    <p>
-    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
-    </p>
-  {% empty %}
-    There are no similar posts yet
-  {% endfor %}
-  {% with comments.count as total_comments %}
-  <h2>
-    {{ total_comments }} comment{{ total_comments|pluralize }}
-  </h2>
-  {% endwith %}
+            <div class="comment-form-wrap pt-5">
+                {% if new_comment %}
+                <h2>Your comment has been added.</h2>
+                {% else %}
+                <h3 class="mb-5">Leave a comment</h3>
+                <form action="" method="post" class="p-3 p-md-5 bg-light">
+                    <div class="form-group">{{ comment_form.as_p }} {% csrf_token %}</div>
 
-  {% for comment in comments %}
-  <div class="comment">
-    <p class="info">
-      Comment {{ forloop.counter }} by {{ comment.name }}
-      {{ comment.created }}
-    </p>
-    {{ comment.body|linebreaks }}
-  </div>
-  {% empty %}
-  <p>There are no comments yet.</p>
-  {% endfor %}
+                    <div class="form-group">
+                        <input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary" />
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- END-->
+</div>
 
-  {% if new_comment %}
-  <h2>Your comment has been added.</h2>
-  {% else %}
-  <h2>Add a new comment</h2>
-  <form method="post">
-    {{ comment_form.as_p }}
-    {% csrf_token %}
-    <p><input type="submit" value="Add comment"></p>
-  </form>
-  {% endif %}
-
-  
 {% endblock %}

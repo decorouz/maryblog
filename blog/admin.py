@@ -10,7 +10,8 @@ from .models import Post, Comment
 # Customizing the way the models are displayed
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'author', 'published_date', 'status')
+    list_display = ('title', 'slug',
+                    'author', 'published_date', 'status')
     list_filter = ('status', 'created_date', 'published_date', 'author')
     search_fields = ('title', 'body')
     prepopulated_fields = {'slug': ('title',)}

@@ -1,9 +1,16 @@
 # Core Django imports
+from curses import meta
+from dataclasses import field, fields
+from django.db import models
 from django.forms import ModelForm, TextInput, EmailInput, Textarea
+
 from django import forms
 
 # Blog application imports
-from blog.models import Comment
+from blog.models import Comment, Post
+
+# Third-party app imports
+from ckeditor.widgets import CKEditorWidget
 
 
 class EmailPostForm(forms.Form):
@@ -35,7 +42,7 @@ class CommentForm(ModelForm):
             "body": Textarea(attrs={"row": 2,
                                     "name": "contact-form-message",
                                     "class": "text-area-message form-control",
-                                    "placeholder": "Enter your email",
+                                    "placeholder": "Enter your comment",
                                     "arai-required": "true",
                                     "aria-valid": "false"})
         }
@@ -45,4 +52,8 @@ class SearchForm(forms.Form):
     query = forms.CharField()
 
 
-#
+class PostForm(ModelForm):
+    class Meta:
+        model = Post
+        fields = ["title", "slug", "author", "featured_image",
+                  "body", "status", "tags"]

@@ -28,7 +28,7 @@ sitemaps = {
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("blog/", include("blog.urls", namespace="blog")),
-    path("", RedirectView.as_view(url="blog/", permanent=True)),
+    path("", RedirectView.as_view(url="blog", permanent=True)),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap')
 ]

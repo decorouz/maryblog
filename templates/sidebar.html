@@ -1,6 +1,7 @@
-{% load static %} {% load blog_tags %}
+{% load static %}
+{% load blog_tags %}
 
-<div id="sidebar">
+<!-- <div >
   <h2>My blog</h2>
   <p>This is my blog. I've written {% total_posts %} posts so far</p>
   <p>
@@ -19,4 +20,111 @@
     </li>
     {% endfor %}
   </ul>
+
+</div> -->
+
+<div class="col-xl-4 sidebar ftco-animate bg-light pt-5">
+  <div class="sidebar-box pt-md-4">
+    <form action="{% url 'blog:post_search' %}" method="get" class="search-form">
+      <div class="form-group">
+        <span class="icon icon-search"></span>
+        <input type="text" name="search_query" class="form-control" placeholder="Type a keyword and hit enter" />
+      </div>
+    </form>
+  </div>
+  <div class="sidebar-box ftco-animate">
+    <h3 class="sidebar-heading">Categories</h3>
+    <ul class="categories">
+      <li>
+        <a href="#">Fashion <span>(6)</span></a>
+      </li>
+      <li>
+        <a href="#">Technology <span>(8)</span></a>
+      </li>
+
+    </ul>
+  </div>
+
+  <!-- Popular Articles-->
+  <div class="sidebar-box ftco-animate">
+    <h3 class="sidebar-heading">Popular Articles</h3>
+    {% get_most_commented_posts as most_commented_posts %}
+
+    {% for post in most_commented_posts %}
+    <div class="block-21 mb-4 d-flex">
+
+      <a class="blog-img mr-4" style="background-image: url('{{ post.featured_image.url }}')"></a>
+      <div class="text">
+        <h3 class="heading">
+          <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+        </h3>
+        <div class="meta">
+          <div>
+            <a href="#"><span class="icon-calendar"></span> {{ post.published_date}} </a>
+          </div>
+          <div>
+            <a href="#"><span class="icon-person"></span> {{post.author.first_name}} {{post.author.last_name}}</a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+
+  <div class="sidebar-box ftco-animate">
+    <h3 class="sidebar-heading">Tag Cloud</h3>
+
+    <ul class="tagcloud">
+      {% for tag in common_tags %}
+
+      <a href="{% url "blog:post_list_by_tag" tag.slug %}" class="tag-cloud-link">{{tag}}</a>
+      {% endfor %}
+    </ul>
+
+  </div>
+
+  <div class="sidebar-box subs-wrap img py-4" style="background-image: url(images/bg_1.jpg)">
+    <div class="overlay"></div>
+    <h3 class="mb-4 sidebar-heading">Newsletter</h3>
+    <p class="mb-4">
+      Far far away, behind the word mountains, far from the
+      countries Vokalia
+    </p>
+    <form action="#" class="subscribe-form">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Email Address" />
+        <input type="submit" value="Subscribe" class="mt-2 btn btn-white submit" />
+      </div>
+    </form>
+  </div>
+
+  <div class="sidebar-box ftco-animate">
+    <h3 class="sidebar-heading">Archives</h3>
+    <ul class="categories">
+      <li>
+        <a href="#">Decob14 2018 <span>(10)</span></a>
+      </li>
+      <li>
+        <a href="#">September 2018 <span>(6)</span></a>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="sidebar-box ftco-animate">
+    <h3 class="sidebar-heading">Article Meter</h3>
+    <p>
+      I have written {% total_posts %} articles so far
+    </p>
+    <p>
+      <a href="{% url 'blog:post_feed' %}">Subscribe to my RSS feed</a>
+    </p>
+  </div>
+</div>
+<!-- END COL -->
 </div>

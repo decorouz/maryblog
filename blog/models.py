@@ -1,14 +1,16 @@
 
+# Core django import
+from django.utils.text import slugify
 from django.db import models
-from django.db.models.fields import BooleanField, CharField, DateTimeField, EmailField, SlugField, TextField
 from django.contrib.auth.models import User
 from django.db.models.fields.related import ForeignKey
 from django.db.models.manager import Manager
 from django.utils import timezone
 from django.urls import reverse
-from taggit.managers import TaggableManager
+from django.db.models.fields import BooleanField, CharField, DateTimeField, EmailField, SlugField, TextField
 
-# Create your models here.
+# Third party imports
+from taggit.managers import TaggableManager
 
 # Creating model managers
 
@@ -26,6 +28,8 @@ class Post(models.Model):
         ("draft", "Draft"),
         ("published", "Published")
     )
+
+    # Blog Model fields
 
     title = CharField(max_length=250)
     slug = SlugField(max_length=250, unique_for_date="published_date")
@@ -57,9 +61,9 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
-    name = CharField(max_length=25)
+    name = CharField(max_length=25, null=False, blank=False)
     email = EmailField()
-    body = TextField()
+    body = TextField(null=False, blank=False)
     created = DateTimeField(auto_now_add=True)
     updated = DateTimeField(auto_now=True)
     # Field used to manually deactivate inappropiate comment

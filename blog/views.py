@@ -1,15 +1,17 @@
-from django.contrib.postgres import search
-from django.core import paginator
-from django.db.models.fields.related import OneToOneField
-from django.shortcuts import render, get_object_or_404
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from blog.forms import EmailPostForm, CommentForm, SearchForm
-from .models import Post, Comment
-from django.views.generic import ListView
+from blog.forms import EmailPostForm, CommentForm, PostForm, SearchForm
+
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+
+
+from .models import Post
+
 from taggit.models import Tag
 from django.db.models import Count
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 
 # class PostListView(ListView):
@@ -19,26 +21,52 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 #     context_object_name = "posts"
 
 
+def create_post(request):
+    post_form = PostForm()
+
+    if request.method == "POST":
+        post_form = PostForm(request.POST, request.FILES)
+        if post_form.is_valid():
+            post_form.save()
+            return redirect('blog:post_list')
+
+    context = {"post_form": post_form}
+    return render(request, "blog/post/post_form.html", context)
+
+
 def post_list(request, tag_slug=None):
+    # comments = Post.objects.all().annotate(Count('comments'))
+    # comm = Comment.objects.filter(post__in=comments)
+
+    common_tags = Post.tags.all()
+
     object_list = Post.published.all()
+
     tag = None
     if tag_slug:
         tag = get_object_or_404(Tag, slug=tag_slug)
         object_list = object_list.filter(tags__in=[tag])
-    paginator = Paginator(object_list, 3)
+
+    paginator = Paginator(object_list, 5)
+
     page = request.GET.get("page")
     try:
         posts = paginator.page(page)
     except PageNotAnInteger:
-        # if page is not an integer deliver the first page
-        posts = paginator.page(1)
+        # if page is not an integer, deliver the first page
+        page = 1
+        posts = paginator.page(page)
     except EmptyPage:
-        # if page is our of range deliver the last page of results
-        posts = paginator.page(paginator.num_pages)
+        # if page is out of range, deliver the last page of results
+        page = paginator.num_pages
+        posts = paginator.page(page)
 
-    return render(request, "blog/post/list.html", {"page": page,
-                                                   "posts": posts,
-                                                   "tag": tag})
+    return render(
+        request,
+        "blog/post/list.html",
+        {"page": page, "paginator": paginator, "posts": posts, "tag": tag,
+            "common_tags": common_tags},
+    )
 
 
 # Create your views here.
@@ -52,25 +80,29 @@ def post_share(request, post_id):
             cd = form.cleaned_data
             post_url = request.build_absolute_uri(post.get_absolute_url())
             subject = f"{cd['name']} recommend you read {post.title}"
-            message = f"Read {post.title} at {post_url}\n\n {cd['name']}\'s comments: {cd['comments']} "
+            message = f"Read {post.title} at {post_url}\n\n {cd['name']}'s comments: {cd['comments']} "
             send_mail(subject, message, "agdev882@gmail.com",
-                      [cd['receiver_email']])
+                      [cd["receiver_email"]])
             sent = True
     else:
         form = EmailPostForm()
-    return render(request, "blog/post/share.html",  {"post": post, "form": form, "sent": sent})
+    return render(request, "blog/post/share.html", {"post": post, "form": form, "sent": sent})
+
 
 # Create class base views
 #
 
 
 def post_detail(request, year, month, day, post):
-    """ Handles the views of a single post"""
-    post = get_object_or_404(Post,
-                             slug=post, status="published",
-                             published_date__year=year,
-                             published_date__month=month,
-                             published_date__day=day)
+    """Handles the views of a single post"""
+    post = get_object_or_404(
+        Post,
+        slug=post,
+        status="published",
+        published_date__year=year,
+        published_date__month=month,
+        published_date__day=day,
+    )
 
     # List of active comments for this post
     comments = post.comments.filter(active=True)
@@ -85,6 +117,7 @@ def post_detail(request, year, month, day, post):
             new_comment.post = post
             # Save the comment to the database
             new_comment.save()
+            return redirect(post.get_absolute_url())
     else:
         comment_form = CommentForm()
 
@@ -95,28 +128,39 @@ def post_detail(request, year, month, day, post):
     similar_posts = similar_posts.annotate(same_tags=Count(
         "tags")).order_by("-same_tags", "-published_date")[:4]
 
-    return render(request, "blog/post/detail.html", {"post": post,
-                                                     "comments": comments,
-                                                     "new_comment": new_comment,
-                                                     "comment_form": comment_form,
-                                                     "similar_posts": similar_posts})
+    return render(
+        request,
+        "blog/post/detail.html",
+        {
+            "post": post,
+            "comments": comments,
+            "new_comment": new_comment,
+            "comment_form": comment_form,
+            "similar_posts": similar_posts,
+        },
+    )
 
 
 def post_search(request):
-    form = SearchForm()
-    query = None
+
     results = []
-    if "query" in request.GET:
-        form = SearchForm(request.GET)
-        if form.is_valid():
-            query = form.cleaned_data["query"]
-            search_vector = SearchVector(
-                "title", weight="A") + SearchVector("body", weight="B")
-            search_query = SearchQuery(query)
-            results = Post.published.annotate(
-                search=search_vector,
-                rank=SearchRank(search_vector, search_query)).filter(rank__gte=0.3).order_by("-rank")
-    return render(request, "blog/post/search.html",
-                  {"form": form,
-                   "query": query,
-                   "results": results})
+    if request.method == "GET":
+        search_query = request.GET.get("search_query")
+        search_vector = SearchVector(
+            "title", weight="A") + SearchVector("body", weight="B")
+        searching = SearchQuery(search_query)
+        if search_query != "":
+            results = (
+                Post.published.annotate(
+                    search=search_vector, rank=SearchRank(search_vector, searching)).filter(rank__gte=0.3)
+                .order_by("-rank")
+            )
+    else:
+        return Post.published.all()
+
+    return render(request, "blog/post/search.html", {"search_query": search_query, "results": results})
+
+
+def about(request):
+    author = Post.author
+    return render(request, "about-me.html", {"author": author})
