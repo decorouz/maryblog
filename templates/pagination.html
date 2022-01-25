@@ -1,14 +1,33 @@
-<div class="pagination">
-    <span class="step-links">
-      {% if page.has_previous %}
-        <a href="?page={{ page.previous_page_number }}">Previous</a>
-      {% endif %}
-      <span class="current">
-        Page {{ page.number }} of {{ page.paginator.num_pages }}.
-      </span>
-      {% if page.has_next %}
-        <a href="?page={{ page.next_page_number }}">Next</a>
-      {% endif %}
-    </span>
+<div class="row">
+  <div class="col">
+    <div class="block-27">
+      <ul>
+
+        {% if posts.has_previous %}
+        <li>
+          <a href="?page={{ posts.previous_page_number }}">&lt;</a>
+        </li>
+        {% endif %}
+
+        {% for page in paginator.page_range %}
+
+        {% if page == posts.number %}
+        <li class="active"><a href="?page={{page}}">{{page}}</a></li>
+        {% else %}
+        <li><a href="?page={{page}}" class="active">{{page}}</a></li>
+
+        {% endif %}
+        {% endfor %}
+
+
+        {% if posts.has_next %}
+        <li><a href="?page={{ posts.next_page_number }}">&gt;</a></li>
+        {% endif %}
+
+
+
+      </ul>
+
+    </div>
   </div>
-  
+</div>
