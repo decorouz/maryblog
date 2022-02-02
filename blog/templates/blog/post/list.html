@@ -19,6 +19,11 @@
             <p class="meta">
               <span><i class="icon-calendar mr-2"></i>{{ post.published_date}} </span>
               <span><i class="icon-person"></i>{{post.author}}</span>
+              {% with post.comments_set.all.count as total_comments %}
+              <span>
+                <i class="icon-comment2 mr-2"></i> {{total_comments}} comment{{ total_comments|pluralize }}
+              </span>
+              {% endwith %}
 
 
 

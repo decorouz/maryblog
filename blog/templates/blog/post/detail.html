@@ -1,4 +1,9 @@
-{% extends "base.html" %} {% load blog_tags %} {% block title %} {{ post.title }} {% endblock %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
+{% load blog_tags %}
+{% block title %} {{ post.title }} {% endblock %}
+
+{% block content %}
 
 <div class="col-lg-8 px-md-5 py-5">
     <div class="row pt-md-4">
@@ -18,6 +23,7 @@
                 {% endwith %}
             </p>
         </div>
+
         <p>{{ post.body|markdown }}</p>
 
         <div class="tag-widget post-tag-container mb-5 mt-5">
@@ -46,12 +52,12 @@
                 {% for comment in comments %}
                 <li class="comment">
                     <div class="vcard bio">
-                        <img src="images/person_1.jpg" alt="Image placeholder" />
+                        <img src="{% static 'images/person_1.jpg' %}" alt="Image placeholder" />
                     </div>
                     <div class="comment-body">
                         <h3>{{ comment.name }}</h3>
                         <div class="meta">{{ comment.created }}</div>
-                        <p>{{ comment.body|linebreaks }}</p>
+                        <p>{{ comment.body|linebreaksbr }}</p>
                         <p><a href="#" class="reply">Reply</a></p>
                     </div>
                     {% empty %}

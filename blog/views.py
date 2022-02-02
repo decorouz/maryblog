@@ -7,7 +7,7 @@ from blog.forms import EmailPostForm, CommentForm, PostForm, SearchForm
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 
-from .models import Post
+from .models import Comment, Post
 
 from taggit.models import Tag
 from django.db.models import Count
@@ -89,7 +89,7 @@ def post_detail(request, year, month, day, post):
     new_comment = None
 
     if request.method == "POST":
-        comment_form = CommentForm(data=request.POST)
+        comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             # Create comment object but don't save to database yet
             new_comment = comment_form.save(commit=False)
@@ -107,7 +107,7 @@ def post_detail(request, year, month, day, post):
         tags__in=post_tags_ids).exclude(id=post.id)
     similar_posts = similar_posts.annotate(same_tags=Count(
         "tags")).order_by("-same_tags", "-published_date")[:4]
-
+    print(comments)
     return render(
         request,
         "blog/post/detail.html",

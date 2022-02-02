@@ -55,5 +55,11 @@ class SearchForm(forms.Form):
 class PostForm(ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "slug", "author", "featured_image",
+        fields = ["title", "featured_image",
                   "body", "status", "tags"]
+
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            field.widget.attrs.update({"class": "input"})

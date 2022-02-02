@@ -7,6 +7,7 @@ from django.db.models.fields.related import ForeignKey
 from django.db.models.manager import Manager
 from django.utils import timezone
 from django.urls import reverse
+from django.template.defaultfilters import slugify
 from django.db.models.fields import BooleanField, CharField, DateTimeField, EmailField, SlugField, TextField
 
 # Third party imports
@@ -32,9 +33,10 @@ class Post(models.Model):
     # Blog Model fields
 
     title = CharField(max_length=250)
-    slug = SlugField(max_length=250, unique_for_date="published_date")
+    slug = SlugField(
+        max_length=250, unique_for_date="published_date", null=True, unique=True)
     author = ForeignKey(User, on_delete=models.CASCADE,
-                        related_name="blog_posts")
+                        related_name="blog_posts", null=True, blank=True)
     featured_image = models.ImageField(
         null=True, blank=True, default="default.jpg")
     body = TextField()
@@ -56,11 +58,17 @@ class Post(models.Model):
         return reverse("blog:post_detail",
                        args=[self.published_date.year, self.published_date.month, self.published_date.day, self.slug])
 
+    def save(self, *args, **kwargs):  # new
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+
     tags = TaggableManager()
 
 
 class Comment(models.Model):
-    post = ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name="comments")
     name = CharField(max_length=25, null=False, blank=False)
     email = EmailField()
     body = TextField(null=False, blank=False)

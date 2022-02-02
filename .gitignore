@@ -154,6 +154,8 @@ media/profile_pics
 media/banner
 media/uploads/
 
+static/images/uploads
+
 # Pycharm Files
 .idea
 .DS_Store
@@ -163,3 +165,11 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+blog/migrations/0006_alter_post_author.py
+blog/migrations/0007_alter_post_slug.py
+static/images/8752cfaa-61ea-4784-9a2b-899eaa23371a_2.JPG
+static/images/8752cfaa-61ea-4784-9a2b-899eaa23371a_2_2yEz40c.JPG
+static/images/EWIVCYgXgAU1zmD_7ygEG0T.jpeg
+static/images/EWIVCYhXkAIpSRI.jpeg
+static/images/IMG_5067.JPG
+static/images/bc1cc85b-2ed2-4fa3-8784-3dd8b6feaba3.jpeg
